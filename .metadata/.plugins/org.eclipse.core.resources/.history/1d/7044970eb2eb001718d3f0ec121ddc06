@@ -1,0 +1,151 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.udp;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author TAMIM_
+ */
+public class UDP_Client {
+
+
+	private DatagramSocket clientSockets= null;
+	private DatagramSocket receiveTemp=null ;
+	private DatagramSocket sendBuzzer=null;
+	private InetAddress IPAddress=null;
+	public UDP_Client() {
+
+		init();
+	}
+
+	public void init () {
+		try {
+			IPAddress = InetAddress.getByName("192.168.4.252");
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			clientSockets = new DatagramSocket();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
+
+		try {
+			receiveTemp = new DatagramSocket();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			sendBuzzer = new DatagramSocket();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
+	public  String read() throws Exception{
+		//    	System.out.println(""+ clientSockets.isConnected());
+
+		String modifiedSentence="";
+		
+		if(clientSockets != null) {
+			try {
+				
+				byte[] sendData = new byte[1024];
+				String sentence = "ldr";
+				sendData = sentence.getBytes();
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 41234);
+				clientSockets.send(sendPacket);
+				byte[] receiveData = new byte[10];
+				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+
+				clientSockets.receive(receivePacket);
+				modifiedSentence = new String(receivePacket.getData());
+
+			} catch (SocketException ex) {
+				clientSockets.close();
+			}
+		}else {
+			init();
+		}
+
+		return modifiedSentence;
+
+	}
+
+
+
+	public  String getTemp() {
+
+		String 	modifiedSentence="";
+
+		if(receiveTemp != null) {
+			try {
+				receiveTemp.setSoTimeout(5000);
+
+				byte[] sendData = new byte[1024];
+				String sentence = "temp";
+				sendData = sentence.getBytes();
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 41234);
+				receiveTemp.send(sendPacket);
+				byte[] receiveData = new byte[10];
+				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+				receiveTemp.receive(receivePacket);
+
+				modifiedSentence = new String(receivePacket.getData());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+
+		}else{
+			
+			init();
+		}
+
+		return modifiedSentence;
+
+	}
+
+	public  void buzzer() throws Exception{
+
+
+		if(sendBuzzer != null) {
+			byte[] sendData = new byte[1024];
+			String sentence = "buz";
+			sendData = sentence.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 41234);
+			sendBuzzer.send(sendPacket);
+		}else {
+			sendBuzzer.close();
+			init();
+		}
+
+		//    receiveTemp.close();
+
+	}
+
+}
